@@ -58,6 +58,7 @@ $(function () {
       }
     })
   })
+
   // 为登录表单绑定 submit 事件
   $('.login-box form').on('submit', function (e) {
     // 阻止表单的默认提交行为
@@ -73,7 +74,7 @@ $(function () {
         location.href = 'index.html'
       } else {
         // 登录失败
-        layer.msg('登录失败!')  
+        layer.msg('登录失败!')
       }
     })
   })
