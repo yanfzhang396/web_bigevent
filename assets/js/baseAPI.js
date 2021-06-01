@@ -1,7 +1,26 @@
-// 注意：每次调用 $.get() 或 $.post() 或 $.ajax() 的时候，
-// 会先调用 ajaxPrefilter 这个函数
-// 在这个函数中，可以拿到我们给Ajax提供的配置对象
-$.ajaxPrefilter(function(options) {
-  // 在发起真正的 Ajax 请求之前，统一拼接请求的根路径
-  options.url = 'http://ajax.frontend.itheima.net' + options.url
+$.ajaxPrefilter(function (options) {
+  // 统一设置请求根路径
+  if (options.url.indexOf('http') === -1) {
+    console.log(options.url)
+    options.url = 'http://api-breakingnews-web.itheima.net' + options.url
+    // options.url = 'http://www.liulongbin.top:3007' + options.url
+  }
+
+  // 统一设置有权限接口的 headers 请求头
+  const tokenStr = localStorage.getItem('token')
+  if (options.url.indexOf('/my/') !== -1 && tokenStr) {
+    options.headers = {
+      Authorization: tokenStr
+    }
+  }
+
+  // 监听请求完成时的回调函数
+  options.complete = function (res) {
+    if (res.responseJSON.message === '身份认证失败！') {
+      // 身份认证失败
+      // 清空本地存储 & 强制用户跳转到登录页
+      localStorage.clear()
+      location.href = 'login.html'
+    }
+  }
 })

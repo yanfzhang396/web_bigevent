@@ -1,73 +1,79 @@
-$(function() {
-  // 点击“去注册账号”的链接
-  $('#link_reg').on('click', function() {
-    $('.login-box').hide()
-    $('.reg-box').show()
+$(function () {
+  // 自定义校验规则
+  layui.form.verify({
+    // 自定义的校验规则（验证两个密码框的值是否相等：如果相等则校验通过；否则校验失败！）
+    rePwd: function (val) {
+      // 获取到密码框的值
+      const pwd = $('.reg-box [name="password"]').val().trim()
+      if (pwd !== val) {
+        // 两个密码框的值不一致
+        return '输入的两次密码不一致！'
+      }
+      // 如果校验通过，不需要做任何处理
+    },
+    // 校验密码长度的验证规则
+    pwd: [/^[\S]{6,12}$/, '密码的长度为6-12个字符，且不能包含空格！']
   })
 
-  // 点击“去登录”的链接
-  $('#link_login').on('click', function() {
+  // 点击了去注册的链接
+  $('#link-reg').on('click', function () {
+    // 展示注册盒子
+    $('.reg-box').show()
+    // 隐藏登录盒子
+    $('.login-box').hide()
+  })
+
+  // 点击了去登录的链接
+  $('#link-login').on('click', function () {
+    // 展示登录盒子
     $('.login-box').show()
+    // 隐藏注册盒子
     $('.reg-box').hide()
   })
 
-  // 从 layui 中获取 form 对象
-  var form = layui.form
-  var layer = layui.layer
-  // 通过 form.verify() 函数自定义校验规则
-  form.verify({
-    // 自定义了一个叫做 pwd 校验规则
-    pwd: [/^[\S]{6,12}$/, '密码必须6到12位，且不能出现空格'],
-    // 校验两次密码是否一致的规则
-    repwd: function(value) {
-      // 通过形参拿到的是确认密码框中的内容
-      // 还需要拿到密码框中的内容
-      // 然后进行一次等于的判断
-      // 如果判断失败,则return一个提示消息即可
-      var pwd = $('.reg-box [name=password]').val()
-      if (pwd !== value) {
-        return '两次密码不一致！'
-      }
-    }
-  })
-
-  // 监听注册表单的提交事件
-  $('#form_reg').on('submit', function(e) {
-    // 1. 阻止默认的提交行为
+  // 为注册的表单绑定 submit 事件
+  $('.reg-box form').on('submit', function (e) {
+    // 1. 阻止表单的默认提交
     e.preventDefault()
-    // 2. 发起Ajax的POST请求
-    var data = {
-      username: $('#form_reg [name=username]').val(),
-      password: $('#form_reg [name=password]').val()
-    }
-    $.post('/api/reguser', data, function(res) {
-      if (res.status !== 0) {
-        return layer.msg(res.message)
+
+    // 2. 发送 Ajax 请求
+    $.ajax({
+      type: 'POST',
+      url: '/api/reguser',
+      // data: $(this).serialize(),
+      data: {
+        username: $('.reg-box [name="username"]').val().trim(),
+        password: $('.reg-box [name="password"]').val().trim()
+      },
+      success: function (res) {
+        if (res.status === 0) {
+          // 注册成功!
+          layer.msg('注册成功,请登录!')
+          // 模拟"去登录"的点击行为
+          $('#link-login').click()
+        } else {
+          // 注册失败!
+          layer.msg(res.message)
+        }
       }
-      layer.msg('注册成功，请登录！')
-      // 模拟人的点击行为
-      $('#link_login').click()
     })
   })
-
-  // 监听登录表单的提交事件
-  $('#form_login').submit(function(e) {
-    // 阻止默认提交行为
+  // 为登录表单绑定 submit 事件
+  $('.login-box form').on('submit', function (e) {
+    // 阻止表单的默认提交行为
     e.preventDefault()
-    $.ajax({
-      url: '/api/login',
-      method: 'POST',
-      // 快速获取表单中的数据
-      data: $(this).serialize(),
-      success: function(res) {
-        if (res.status !== 0) {
-          return layer.msg('登录失败！')
-        }
-        layer.msg('登录成功！')
-        // 将登录成功得到的 token 字符串，保存到 localStorage 中
+    // 发起 Ajax 的登录请求
+    $.post('/api/login', $(this).serialize(), function (res) {
+      if (res.status === 0) {
+        // 登录成功
+        layer.msg('登录成功!')
+        // 把得到的 token 的值,存储到 localStorage 中
         localStorage.setItem('token', res.token)
-        // 跳转到后台主页
-        location.href = '/index.html'
+        // 跳转到 index.html 页面
+        location.href = 'index.html'
+      } else {
+        // 登录失败
+        layer.msg('登录失败!')  
       }
     })
   })
