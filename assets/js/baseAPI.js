@@ -1,7 +1,7 @@
 $.ajaxPrefilter(function (options) {
   // 统一设置请求根路径
   if (options.url.indexOf('http') === -1) {
-    console.log(options.url)
+    // console.log(options.url)
     options.url = 'http://api-breakingnews-web.itheima.net' + options.url
     // options.url = 'http://www.liulongbin.top:3007' + options.url
   }
